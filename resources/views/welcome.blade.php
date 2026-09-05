@@ -105,8 +105,17 @@
             </nav>
 
             <div class="nav-actions">
-                <a class="btn btn-light" href="#login">Login</a>
-                <a class="btn btn-primary" href="#pricing">Get Started</a>
+                @guest
+                    <a class="btn btn-light" href="{{ route('login') }}">Login</a>
+                    <a class="btn btn-primary" href="#pricing">Get Started</a>
+                @endguest
+                @auth
+                    <span class="btn btn-light">Hi, {{ Auth::user()->name }}</span>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button class="btn btn-primary" type="submit">Logout</button>
+                    </form>
+                @endauth
             </div>
         </header>
 

@@ -14,6 +14,7 @@
         </a>
         <nav>
             <a href="{{ route('admin.dashboard') }}" @class(['active' => request()->routeIs('admin.dashboard')])>Dashboard</a>
+            <a href="{{ route('admin.users.index') }}" @class(['active' => request()->routeIs('admin.users.*')])>New Users</a>
             <a href="{{ route('admin.enquiries.index') }}" @class(['active' => request()->routeIs('admin.enquiries.*')])>Enquiries</a>
             <a href="{{ route('admin.templates.index') }}" @class(['active' => request()->routeIs('admin.templates.*')])>Templates</a>
             <a href="{{ route('admin.plans.index') }}" @class(['active' => request()->routeIs('admin.plans.*')])>Plans</a>

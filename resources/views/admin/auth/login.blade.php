@@ -14,12 +14,13 @@
             <span><strong>InviteCraft</strong><small>Admin Panel</small></span>
         </a>
         <h1>Login to Admin</h1>
-        <label>Email<input type="email" name="email" value="{{ old('email', 'admin@invitecraft.test') }}" required autofocus></label>
+        <label>Email<input type="email" name="email" value="{{ old('email') }}" required autofocus></label>
         <label>Password<input type="password" name="password" placeholder="password" required></label>
         <label class="check-row"><input type="checkbox" name="remember" value="1"> Remember me</label>
         @error('email')<p class="form-error">{{ $message }}</p>@enderror
+        @error('password')<p class="form-error">{{ $message }}</p>@enderror
         <button type="submit" class="btn btn-primary">Login</button>
-        <p class="hint">Default: admin@invitecraft.test / password</p>
+        <p class="hint"><a href="#">Forgot Password?</a></p>
     </form>
 </body>
 </html>

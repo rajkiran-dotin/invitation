@@ -14,7 +14,14 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
+            'track.site.visit' => \App\Http\Middleware\TrackSiteVisit::class,
         ]);
+
+        $middleware->redirectUsersTo(
+            fn (Request $request): string => $request->user()?->is_admin
+                ? route('admin.dashboard')
+                : route('home'),
+        );
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
