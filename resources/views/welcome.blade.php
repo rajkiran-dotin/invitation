@@ -214,7 +214,7 @@
                         <p class="section-kicker">Stunning templates</p>
                         <h2>Beautiful Templates for You</h2>
                     </div>
-                    <a class="btn btn-outline" href="#templates">View All Templates</a>
+                    <a class="btn btn-outline" href="{{ route('templates.index') }}">View All Templates</a>
                 </div>
                 <div class="template-grid">
                     @foreach ($templates as $template)
@@ -261,44 +261,6 @@
                     @endforeach
                 </div>
                 <div class="dots"><span></span><span></span><span></span></div>
-            </section>
-
-            <section class="section enquiry-section" id="contact">
-                <div>
-                    <p class="section-kicker">Start your invitation</p>
-                    <h2>Tell Us About Your Celebration</h2>
-                    <p>Submit your details and the InviteCraft team will help you prepare the perfect digital invitation.</p>
-                </div>
-                <form class="enquiry-form" method="POST" action="{{ route('enquiry.store') }}">
-                    @csrf
-                    @if (session('status'))
-                        <div class="success-message">{{ session('status') }}</div>
-                    @endif
-                    <label>Name<input name="name" value="{{ old('name') }}" required></label>
-                    <label>Email<input type="email" name="email" value="{{ old('email') }}" required></label>
-                    <label>Phone<input name="phone" value="{{ old('phone') }}"></label>
-                    <label>Event Type
-                        <select name="event_type" required>
-                            @foreach (['Wedding', 'Engagement', 'Birthday', 'Mundan Ceremony', 'Griha Pravesh'] as $eventType)
-                                <option value="{{ $eventType }}" @selected(old('event_type') === $eventType)>{{ $eventType }}</option>
-                            @endforeach
-                        </select>
-                    </label>
-                    <label>Event Date<input type="date" name="event_date" value="{{ old('event_date') }}"></label>
-                    <label>Plan
-                        <select name="plan">
-                            <option value="">Not decided</option>
-                            @foreach ($plans as $plan)
-                                <option value="{{ $plan['name'] }}" @selected(old('plan') === $plan['name'])>{{ $plan['name'] }}</option>
-                            @endforeach
-                        </select>
-                    </label>
-                    <label class="wide">Message<textarea name="message" rows="4">{{ old('message') }}</textarea></label>
-                    @if ($errors->any())
-                        <div class="form-error wide">{{ $errors->first() }}</div>
-                    @endif
-                    <button class="btn btn-primary wide" type="submit">Send Request</button>
-                </form>
             </section>
 
             <section class="faq section" id="blog">

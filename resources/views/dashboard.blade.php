@@ -29,7 +29,10 @@
                 <p class="section-kicker">Your account</p>
                 <h1>Welcome, {{ auth()->user()->name }}</h1>
                 <p>Manage your InviteCraft account and start creating beautiful digital invitations.</p>
-                <a class="btn btn-primary btn-lg" href="{{ route('home') }}#pricing">Create Invitation</a>
+                @if (session('selected_template_slug') || request('template'))
+                    <div class="selected-template-notice">Selected template: {{ session('selected_template_slug', request('template')) }}</div>
+                @endif
+                <a class="btn btn-primary btn-lg" href="{{ route('templates.index') }}">Create Invitation</a>
             </section>
         </main>
     </div>

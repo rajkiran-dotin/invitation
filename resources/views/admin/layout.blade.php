@@ -17,6 +17,7 @@
             <a href="{{ route('admin.users.index') }}" @class(['active' => request()->routeIs('admin.users.*')])>New Users</a>
             <a href="{{ route('admin.enquiries.index') }}" @class(['active' => request()->routeIs('admin.enquiries.*')])>Enquiries</a>
             <a href="{{ route('admin.templates.index') }}" @class(['active' => request()->routeIs('admin.templates.*')])>Templates</a>
+            <a href="{{ route('admin.template-categories.index') }}" @class(['active' => request()->routeIs('admin.template-categories.*')])>Template Categories</a>
             <a href="{{ route('admin.plans.index') }}" @class(['active' => request()->routeIs('admin.plans.*')])>Plans</a>
             <a href="{{ route('home') }}">View Website</a>
         </nav>

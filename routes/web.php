@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EnquiryController;
 use App\Http\Controllers\Admin\PlanController;
+use App\Http\Controllers\Admin\TemplateCategoryController;
 use App\Http\Controllers\Admin\TemplateController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -11,9 +12,13 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\DashboardController as UserDashboardController;
 use App\Http\Controllers\LandingController;
+use App\Http\Controllers\TemplateLibraryController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [LandingController::class, 'index'])->middleware('track.site.visit')->name('home');
+Route::get('/templates', [TemplateLibraryController::class, 'index'])->name('templates.index');
+Route::get('/templates/{template:slug}', [TemplateLibraryController::class, 'show'])->name('templates.show');
+Route::get('/templates/{template:slug}/use', [TemplateLibraryController::class, 'select'])->name('templates.use');
 Route::post('/enquiry', [LandingController::class, 'enquiry'])->name('enquiry.store');
 
 Route::middleware('guest')->group(function (): void {
@@ -41,6 +46,8 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::get('/', DashboardController::class)->name('dashboard');
         Route::get('users', [UserController::class, 'index'])->name('users.index');
         Route::get('users/{user}', [UserController::class, 'show'])->name('users.show');
+        Route::patch('template-categories/{template_category}/toggle', [TemplateCategoryController::class, 'toggle'])->name('template-categories.toggle');
+        Route::resource('template-categories', TemplateCategoryController::class)->except('show');
         Route::resource('templates', TemplateController::class)->except('show');
         Route::resource('plans', PlanController::class)->except('show');
         Route::get('enquiries', [EnquiryController::class, 'index'])->name('enquiries.index');

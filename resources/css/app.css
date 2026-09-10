@@ -706,6 +706,386 @@ svg {
 .modern { background: linear-gradient(145deg, #111c3c, #071027); color: #ffe1a1; border: 5px solid #334474; }
 .pastel { background: linear-gradient(145deg, #fff4ff, #efe0ff); color: #42275c; border: 1px solid #d7bbe9; }
 
+
+.templates-library {
+    padding-top: 54px;
+}
+
+.templates-library h1 {
+    font-size: clamp(2.1rem, 4.4vw, 4rem);
+    font-weight: 900;
+    line-height: 1.05;
+    margin: 0;
+}
+
+.category-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 24px 0 28px;
+}
+
+.category-filters a {
+    background: #fff;
+    border: 1px solid color-mix(in srgb, var(--purple) 24%, white);
+    border-radius: 8px;
+    color: #4c475f;
+    font-size: .84rem;
+    font-weight: 900;
+    padding: 11px 15px;
+}
+
+.category-filters a.active,
+.category-filters a:hover {
+    background: var(--purple);
+    border-color: var(--purple);
+    color: #fff;
+}
+
+.template-empty {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--muted);
+    font-weight: 850;
+    grid-column: 1 / -1;
+    padding: 26px;
+    text-align: center;
+}
+
+.templates-market {
+    max-width: 1320px;
+    padding-top: 56px;
+}
+
+.templates-market-hero {
+    margin: 0 auto 28px;
+    max-width: 780px;
+    text-align: center;
+}
+
+.templates-market-hero h1 {
+    font-size: clamp(2.35rem, 5vw, 4.6rem);
+    font-weight: 900;
+    letter-spacing: 0;
+    line-height: 1.02;
+    margin: 12px 0 16px;
+}
+
+.templates-market-hero p:not(.section-kicker) {
+    color: var(--muted);
+    font-size: 1.06rem;
+    line-height: 1.7;
+    margin: 0 auto;
+    max-width: 650px;
+}
+
+.templates-toolbar {
+    align-items: end;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: 0 14px 34px rgb(39 31 64 / 6%);
+    display: grid;
+    gap: 14px;
+    grid-template-columns: minmax(260px, 1fr) 190px auto;
+    margin: 30px 0 20px;
+    padding: 16px;
+}
+
+.templates-search,
+.templates-sort {
+    color: #39354f;
+    display: grid;
+    font-size: .82rem;
+    font-weight: 900;
+    gap: 8px;
+}
+
+.templates-search {
+    position: relative;
+}
+
+.templates-search span {
+    color: var(--purple);
+    left: 14px;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.templates-search svg {
+    height: 18px;
+    width: 18px;
+}
+
+.templates-search input,
+.templates-sort select {
+    background: #fff;
+    border: 1px solid #ded8eb;
+    border-radius: 8px;
+    color: var(--ink);
+    min-height: 48px;
+    padding: 0 14px;
+    width: 100%;
+}
+
+.templates-search input {
+    padding-left: 44px;
+}
+
+.template-category-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 0 0 30px;
+}
+
+.template-category-pills a {
+    background: #fff;
+    border: 1px solid color-mix(in srgb, var(--purple) 28%, white);
+    border-radius: 999px;
+    color: #4c475f;
+    font-size: .85rem;
+    font-weight: 900;
+    line-height: 1;
+    padding: 12px 18px;
+    transition: background .2s ease, border-color .2s ease, color .2s ease, transform .2s ease;
+}
+
+.template-category-pills a.active,
+.template-category-pills a:hover {
+    background: var(--purple);
+    border-color: var(--purple);
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+.market-template-grid {
+    display: grid;
+    gap: 24px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.market-template-card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-shadow: 0 14px 34px rgb(39 31 64 / 6%);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+
+.market-template-card:hover {
+    border-color: color-mix(in srgb, var(--purple) 28%, white);
+    box-shadow: 0 18px 42px rgb(39 31 64 / 9%);
+    transform: translateY(-4px);
+}
+
+.market-template-image {
+    aspect-ratio: 4 / 5;
+    background: #f8f4ff;
+    display: block;
+    overflow: hidden;
+}
+
+.market-template-image img {
+    display: block;
+    height: 100%;
+    object-fit: cover;
+    width: 100%;
+}
+
+.market-template-image .template-preview {
+    border: 0;
+    border-radius: 0;
+    height: 100%;
+    min-height: 0;
+    width: 100%;
+}
+
+.market-template-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 12px;
+    padding: 18px;
+}
+
+.market-template-meta {
+    align-items: center;
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+}
+
+.market-template-meta span,
+.market-template-meta b {
+    border-radius: 999px;
+    display: inline-flex;
+    font-size: .72rem;
+    font-weight: 900;
+    line-height: 1;
+    padding: 7px 10px;
+}
+
+.market-template-meta span {
+    background: #f4efff;
+    color: var(--purple);
+}
+
+.market-template-meta b {
+    background: #fff8db;
+    color: #8a6100;
+}
+
+.market-template-body h2 {
+    font-size: 1.08rem;
+    font-weight: 900;
+    line-height: 1.25;
+    margin: 0;
+}
+
+.market-template-body p {
+    color: var(--muted);
+    flex: 1;
+    font-size: .9rem;
+    line-height: 1.55;
+    margin: 0;
+}
+
+.market-template-actions,
+.template-detail-actions {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: 4px;
+}
+
+.market-template-actions .btn,
+.template-detail-actions .btn {
+    padding: 0 14px;
+    width: 100%;
+}
+
+.templates-pagination {
+    margin-top: 30px;
+}
+
+.template-empty strong,
+.template-empty span {
+    display: block;
+}
+
+.template-empty strong {
+    color: var(--ink);
+    font-size: 1.1rem;
+    margin-bottom: 6px;
+}
+
+.template-detail {
+    align-items: center;
+    display: grid;
+    gap: 48px;
+    grid-template-columns: minmax(340px, .85fr) minmax(0, 1.15fr);
+    max-width: 1240px;
+    padding-top: 56px;
+    text-align: left;
+}
+
+.template-detail-preview {
+    aspect-ratio: 4 / 5;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.template-detail-preview img,
+.template-detail-preview .template-preview {
+    border: 0;
+    border-radius: 0;
+    height: 100%;
+    object-fit: cover;
+    width: 100%;
+}
+
+.template-detail-copy h1 {
+    font-size: clamp(2.25rem, 4.6vw, 4.5rem);
+    font-weight: 900;
+    letter-spacing: 0;
+    line-height: 1.02;
+    margin: 12px 0 16px;
+}
+
+.template-detail-copy p:not(.section-kicker) {
+    color: var(--muted);
+    font-size: 1.05rem;
+    line-height: 1.75;
+    margin: 18px 0;
+}
+
+.template-back-link {
+    align-items: center;
+    color: var(--purple);
+    display: inline-flex;
+    font-size: .86rem;
+    font-weight: 900;
+    gap: 8px;
+    margin-bottom: 22px;
+}
+
+.template-back-link svg {
+    height: 17px;
+    transform: rotate(180deg);
+    width: 17px;
+}
+
+.detail-meta {
+    justify-content: flex-start;
+}
+
+.template-feature-list {
+    display: grid;
+    gap: 10px;
+    list-style: none;
+    margin: 20px 0 26px;
+    padding: 0;
+}
+
+.template-feature-list li {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: #39354f;
+    font-weight: 850;
+    padding: 12px 14px;
+}
+
+.related-templates {
+    max-width: 1240px;
+    padding-top: 30px;
+}
+
+.related-templates h2 {
+    font-size: 2rem;
+    font-weight: 900;
+    margin: 0;
+}
+
+.selected-template-notice {
+    background: #f4efff;
+    border: 1px solid color-mix(in srgb, var(--purple) 26%, white);
+    border-radius: 8px;
+    color: var(--purple);
+    font-weight: 900;
+    margin: 0 0 22px;
+    max-width: 520px;
+    padding: 14px 16px;
+}
 .pricing {
     background: linear-gradient(180deg, #fff, #fbf7ff);
     max-width: none;
@@ -1797,5 +2177,54 @@ svg {
 
     .phone-card {
         width: 172px;
+    }
+}
+
+@media (max-width: 1100px) {
+    .market-template-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .templates-toolbar {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .templates-toolbar .btn {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 900px) {
+    .market-template-grid,
+    .template-detail {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 760px) {
+    .templates-market,
+    .template-detail {
+        padding-left: 18px;
+        padding-right: 18px;
+    }
+
+    .templates-toolbar,
+    .market-template-grid,
+    .template-detail {
+        grid-template-columns: 1fr;
+    }
+
+    .templates-toolbar .btn {
+        grid-column: auto;
+    }
+
+    .market-template-actions,
+    .template-detail-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .template-category-pills a {
+        padding-left: 15px;
+        padding-right: 15px;
     }
 }

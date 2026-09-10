@@ -18,7 +18,7 @@ class LandingController extends Controller
     public function index(): View
     {
         return view('welcome', [
-            'dbTemplates' => $this->activeRows(InvitationTemplate::class, 'invitation_templates', 6),
+            'dbTemplates' => $this->homepageTemplates(),
             'dbPlans' => $this->activeRows(PricingPlan::class, 'pricing_plans'),
             'dbTestimonials' => $this->activeRows(Testimonial::class, 'testimonials', 3),
             'dbFaqs' => $this->activeRows(Faq::class, 'faqs', 5),
@@ -38,6 +38,24 @@ class LandingController extends Controller
         ]));
 
         return back()->with('status', 'Thanks! We received your invitation request.');
+    }
+
+    private function homepageTemplates(): Collection
+    {
+        if (! Schema::hasTable('invitation_templates')) {
+            return collect();
+        }
+
+        $query = InvitationTemplate::query()
+            ->with('templateCategory')
+            ->where('is_active', true)
+            ->orderBy('sort_order');
+
+        if (Schema::hasTable('template_categories') && Schema::hasColumn('invitation_templates', 'category_id')) {
+            $query->whereHas('templateCategory', fn ($query) => $query->where('is_active', true));
+        }
+
+        return $query->take(6)->get();
     }
 
     private function activeRows(string $model, string $table, ?int $limit = null): Collection
