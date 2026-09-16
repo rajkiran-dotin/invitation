@@ -20,6 +20,7 @@ Route::get('/templates', [TemplateLibraryController::class, 'index'])->name('tem
 Route::get('/templates/{template:slug}', [TemplateLibraryController::class, 'show'])->name('templates.show');
 Route::get('/templates/{template:slug}/use', [TemplateLibraryController::class, 'select'])->name('templates.use');
 Route::post('/enquiry', [LandingController::class, 'enquiry'])->name('enquiry.store');
+Route::get('/i/{shareSlug}', [UserDashboardController::class, 'preview'])->name('invitations.preview');
 
 Route::middleware('guest')->group(function (): void {
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
@@ -32,7 +33,18 @@ Route::middleware('guest')->group(function (): void {
 
 Route::middleware('auth')->group(function (): void {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
-    Route::get('/dashboard', UserDashboardController::class)->name('dashboard');
+});
+
+Route::middleware('auth')->group(function (): void {
+    Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
+    Route::prefix('dashboard')->name('dashboard.')->group(function (): void {
+        Route::get('/invitations', [UserDashboardController::class, 'invitations'])->name('invitations');
+        Route::get('/create', [UserDashboardController::class, 'create'])->name('create');
+        Route::post('/create', [UserDashboardController::class, 'store'])->name('store');
+        Route::get('/profile', [UserDashboardController::class, 'profile'])->name('profile');
+        Route::put('/profile', [UserDashboardController::class, 'updateProfile'])->name('profile.update');
+        Route::delete('/invitations/{invitation}', [UserDashboardController::class, 'destroy'])->name('invitations.destroy');
+    });
 });
 
 Route::prefix('admin')->name('admin.')->group(function (): void {
