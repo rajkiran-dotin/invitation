@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
-#[Fillable(['name', 'slug', 'category', 'category_id', 'description', 'preview_image', 'demo_url', 'features', 'is_premium', 'theme_class', 'price', 'is_active', 'sort_order'])]
+#[Fillable(['name', 'slug', 'category', 'category_id', 'description', 'preview_image', 'demo_url', 'features', 'is_premium', 'theme_class', 'view_name', 'price', 'is_active', 'sort_order'])]
 class InvitationTemplate extends Model
 {
     /** @use HasFactory<InvitationTemplateFactory> */

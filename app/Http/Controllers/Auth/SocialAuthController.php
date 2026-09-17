@@ -50,6 +50,10 @@ class SocialAuthController extends Controller
             return redirect()->intended(route('admin.dashboard'));
         }
 
+        if (request()->session()->has('selected_template_slug')) {
+            return redirect()->route('invitations.create', ['template' => request()->session()->get('selected_template_slug')]);
+        }
+
         return redirect()->route('home');
     }
 

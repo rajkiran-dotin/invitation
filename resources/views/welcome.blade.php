@@ -343,7 +343,7 @@
                                 <span class="badge">Most Popular</span>
                             @endif
                             <h3>{{ $plan['name'] }}</h3>
-                            <p class="price">â‚¹ {{ $plan['price'] }} <small>/one time</small></p>
+                            <p class="price">&#8377; {{ $plan['price'] }} <small>/one time</small></p>
                             <ul>
                                 @foreach ($plan['features'] as $feature)
                                     <li>{{ $feature }}</li>
@@ -361,7 +361,7 @@
                 <h2>Loved by Thousands of Families</h2>
                 <div class="testimonial-grid">
                     @foreach ($testimonials as $testimonial)
-                        <article><span>{{ str_repeat('â˜…', (int) $testimonial['rating']) }}</span>
+                        <article><span>@for ($i = 0; $i < (int) $testimonial['rating']; $i++)&#9733;@endfor</span>
                             <p>{{ $testimonial['message'] }}</p><b>- {{ $testimonial['name'] }}</b>
                         </article>
                     @endforeach
@@ -426,7 +426,7 @@
                     <button type="submit"><svg viewBox="0 0 24 24">{!! $icons['send'] !!}</svg></button>
                 </label>
             </form>
-            <small class="copyright">Â© 2026 InviteCraft. All rights reserved.</small>
+            <small class="copyright">&copy; 2026 InviteCraft. All rights reserved.</small>
         </footer>
     </div>
 </body>

@@ -11,6 +11,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\DashboardController as UserDashboardController;
+use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\TemplateLibraryController;
 use Illuminate\Support\Facades\Route;
@@ -20,7 +21,7 @@ Route::get('/templates', [TemplateLibraryController::class, 'index'])->name('tem
 Route::get('/templates/{template:slug}', [TemplateLibraryController::class, 'show'])->name('templates.show');
 Route::get('/templates/{template:slug}/use', [TemplateLibraryController::class, 'select'])->name('templates.use');
 Route::post('/enquiry', [LandingController::class, 'enquiry'])->name('enquiry.store');
-Route::get('/i/{shareSlug}', [UserDashboardController::class, 'preview'])->name('invitations.preview');
+Route::get('/invite/{slug}', [InvitationController::class, 'showPublic'])->name('invitations.public');
 
 Route::middleware('guest')->group(function (): void {
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
@@ -33,18 +34,23 @@ Route::middleware('guest')->group(function (): void {
 
 Route::middleware('auth')->group(function (): void {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
-});
 
-Route::middleware('auth')->group(function (): void {
     Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
     Route::prefix('dashboard')->name('dashboard.')->group(function (): void {
         Route::get('/invitations', [UserDashboardController::class, 'invitations'])->name('invitations');
-        Route::get('/create', [UserDashboardController::class, 'create'])->name('create');
-        Route::post('/create', [UserDashboardController::class, 'store'])->name('store');
+        Route::get('/create', fn () => redirect()->route('invitations.create'))->name('create');
         Route::get('/profile', [UserDashboardController::class, 'profile'])->name('profile');
         Route::put('/profile', [UserDashboardController::class, 'updateProfile'])->name('profile.update');
-        Route::delete('/invitations/{invitation}', [UserDashboardController::class, 'destroy'])->name('invitations.destroy');
     });
+
+    Route::get('/invitations/create', [InvitationController::class, 'create'])->name('invitations.create');
+    Route::get('/invitations/{invitation}/edit', [InvitationController::class, 'edit'])->name('invitations.edit');
+    Route::put('/invitations/{invitation}', [InvitationController::class, 'update'])->name('invitations.update');
+    Route::get('/invitations/{invitation}/preview', [InvitationController::class, 'preview'])->name('invitations.preview');
+    Route::post('/invitations/{invitation}/publish', [InvitationController::class, 'publish'])->name('invitations.publish');
+    Route::post('/invitations/{invitation}/unpublish', [InvitationController::class, 'unpublish'])->name('invitations.unpublish');
+    Route::get('/invitations/{invitation}/success', [InvitationController::class, 'success'])->name('invitations.success');
+    Route::delete('/invitations/{invitation}/gallery/{image}', [InvitationController::class, 'destroyGalleryImage'])->name('invitations.gallery.destroy');
 });
 
 Route::prefix('admin')->name('admin.')->group(function (): void {

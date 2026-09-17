@@ -39,6 +39,10 @@ class RegisteredUserController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
+        if ($request->session()->has('selected_template_slug')) {
+            return redirect()->route('invitations.create', ['template' => $request->session()->get('selected_template_slug')]);
+        }
+
         return redirect()->intended(route('home'));
     }
 }

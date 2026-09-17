@@ -72,7 +72,7 @@ class TemplateLibraryController extends Controller
             return redirect()->route('login')->with('status', 'Log in or register to use this template.');
         }
 
-        return redirect()->route('dashboard', ['template' => $template->slug])->with('status', "Template selected: {$template->name}");
+        return redirect()->route('dashboard', ['template' => $template->slug]);
     }
 
     private function activeCategories()
