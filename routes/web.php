@@ -66,6 +66,7 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::get('users/{user}', [UserController::class, 'show'])->name('users.show');
         Route::patch('template-categories/{template_category}/toggle', [TemplateCategoryController::class, 'toggle'])->name('template-categories.toggle');
         Route::resource('template-categories', TemplateCategoryController::class)->except('show');
+        Route::patch('templates/{template}/status', [TemplateController::class, 'updateStatus'])->name('templates.status');
         Route::resource('templates', TemplateController::class)->except('show');
         Route::resource('plans', PlanController::class)->except('show');
         Route::get('enquiries', [EnquiryController::class, 'index'])->name('enquiries.index');

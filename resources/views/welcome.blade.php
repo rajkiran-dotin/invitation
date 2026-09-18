@@ -5,6 +5,8 @@
             'title' => 'Wedding',
             'copy' => 'Make your special day even more memorable',
             'tone' => 'rose',
+            'available' => true,
+            'href' => route('templates.index', ['category' => 'wedding']),
         ],
         ['icon' => 'gem', 'title' => 'Engagement', 'copy' => 'Celebrate your beautiful beginning', 'tone' => 'violet'],
         ['icon' => 'cake', 'title' => 'Birthday', 'copy' => 'Create magical birthday invitations', 'tone' => 'amber'],
@@ -31,12 +33,12 @@
     ];
 
     $templates = [
-        ['title' => 'Royal Wedding', 'class' => 'royal'],
-        ['title' => 'Floral Bliss', 'class' => 'floral'],
-        ['title' => 'Classic Elegance', 'class' => 'classic'],
-        ['title' => 'Minimal Love', 'class' => 'minimal'],
-        ['title' => 'Modern Chic', 'class' => 'modern'],
-        ['title' => 'Pastel Dream', 'class' => 'pastel'],
+        ['title' => 'Royal Wedding', 'class' => 'royal', 'slug' => 'royal-wedding'],
+        ['title' => 'Floral Bliss', 'class' => 'floral', 'slug' => 'floral-bliss'],
+        ['title' => 'Classic Elegance', 'class' => 'classic', 'slug' => 'classic-elegance'],
+        ['title' => 'Minimal Love', 'class' => 'minimal', 'slug' => 'minimal-love'],
+        ['title' => 'Modern Chic', 'class' => 'modern', 'slug' => 'modern-chic'],
+        ['title' => 'Pastel Dream', 'class' => 'pastel', 'slug' => 'pastel-dream'],
     ];
 
     $plans = [
@@ -83,7 +85,7 @@
 
     if (isset($dbTemplates) && $dbTemplates->isNotEmpty()) {
         $templates = $dbTemplates
-            ->map(fn($template) => ['title' => $template->name, 'class' => $template->theme_class])
+            ->map(fn($template) => ['title' => $template->name, 'class' => $template->theme_class, 'slug' => $template->slug])
             ->all();
     }
 
@@ -286,11 +288,20 @@
                 <h2>Choose Your Event</h2>
                 <div class="event-grid">
                     @foreach ($events as $event)
-                        <article class="event-card {{ $event['tone'] }}">
-                            <span><svg viewBox="0 0 24 24" aria-hidden="true">{!! $icons[$event['icon']] !!}</svg></span>
-                            <h3>{{ $event['title'] }}</h3>
-                            <p>{{ $event['copy'] }}</p>
-                        </article>
+                        @if (!empty($event['available']))
+                            <a class="event-card event-card-link {{ $event['tone'] }}" href="{{ $event['href'] }}" aria-label="View {{ $event['title'] }} templates">
+                                <span><svg viewBox="0 0 24 24" aria-hidden="true">{!! $icons[$event['icon']] !!}</svg></span>
+                                <h3>{{ $event['title'] }}</h3>
+                                <p>{{ $event['copy'] }}</p>
+                            </a>
+                        @else
+                            <article class="event-card event-card-disabled {{ $event['tone'] }}" aria-disabled="true" aria-label="{{ $event['title'] }} - Coming Soon">
+                                <b class="coming-soon-badge">Coming Soon</b>
+                                <span><svg viewBox="0 0 24 24" aria-hidden="true">{!! $icons[$event['icon']] !!}</svg></span>
+                                <h3>{{ $event['title'] }}</h3>
+                                <p>{{ $event['copy'] }}</p>
+                            </article>
+                        @endif
                     @endforeach
                 </div>
             </section>
@@ -321,14 +332,16 @@
                 </div>
                 <div class="template-grid">
                     @foreach ($templates as $template)
-                        <article>
-                            <div class="template-preview {{ $template['class'] }}">
-                                <small>Together forever</small>
-                                <h3>Rahul<br>&<br>Priya</h3>
-                                <span>25 DEC 2036</span>
-                            </div>
-                            <h4>{{ $template['title'] }}</h4>
-                        </article>
+                        <a class="template-card-link" href="{{ route('templates.show', $template['slug']) }}" aria-label="View {{ $template['title'] }} template">
+                            <article class="template-card">
+                                <div class="template-preview {{ $template['class'] }}">
+                                    <small>Together forever</small>
+                                    <h3>Rahul<br>&<br>Priya</h3>
+                                    <span>25 DEC 2036</span>
+                                </div>
+                                <h4>{{ $template['title'] }}</h4>
+                            </article>
+                        </a>
                     @endforeach
                 </div>
             </section>

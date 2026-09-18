@@ -111,6 +111,11 @@ class DatabaseSeeder extends Seeder
                 'is_active' => true,
             ];
 
+            if ($slug === 'royal-wedding') {
+                $attributes['view_name'] = 'invitations.public.royal_saffron_vows';
+                $attributes['demo_url'] = '/templates/royal-wedding';
+            }
+
             $model = InvitationTemplate::firstOrCreate(['slug' => $slug], $attributes);
             $missingAttributes = collect($attributes)
                 ->filter(fn (mixed $value, string $key): bool => $model->{$key} === null || $model->{$key} === '' || $model->{$key} === [])

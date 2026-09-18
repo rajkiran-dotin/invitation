@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\InvitationTemplate;
 use App\Models\TemplateCategory;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -14,10 +15,25 @@ use Illuminate\View\View;
 
 class TemplateController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
+        $categories = TemplateCategory::query()
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
+
+        $templates = InvitationTemplate::query()
+            ->with('templateCategory')
+            ->when($request->filled('category_id'), fn ($query) => $query->where('category_id', $request->integer('category_id')))
+            ->when($request->string('status')->toString() === 'active', fn ($query) => $query->where('is_active', true))
+            ->when($request->string('status')->toString() === 'hidden', fn ($query) => $query->where('is_active', false))
+            ->orderBy('sort_order')
+            ->paginate(12)
+            ->withQueryString();
+
         return view('admin.templates.index', [
-            'templates' => InvitationTemplate::query()->with('templateCategory')->orderBy('sort_order')->paginate(12),
+            'categories' => $categories,
+            'templates' => $templates,
         ]);
     }
 
@@ -56,6 +72,22 @@ class TemplateController extends Controller
         $template->delete();
 
         return back()->with('status', 'Template deleted.');
+    }
+
+    public function updateStatus(Request $request, InvitationTemplate $template): JsonResponse
+    {
+        $validated = $request->validate([
+            'status' => ['required', 'in:active,hidden'],
+        ]);
+
+        $template->update([
+            'is_active' => $validated['status'] === 'active',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'status' => $template->is_active ? 'active' : 'hidden',
+        ]);
     }
 
     private function validated(Request $request, ?InvitationTemplate $template = null): array

@@ -178,6 +178,176 @@ class TemplateCategoryLibraryTest extends TestCase
         ]);
     }
 
+    public function test_admin_can_update_template_status_inline(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $category = TemplateCategory::where('slug', 'wedding')->firstOrFail();
+        $template = InvitationTemplate::create([
+            'name' => 'Inline Status Wedding',
+            'slug' => 'inline-status-wedding',
+            'category' => 'Wedding',
+            'category_id' => $category->id,
+            'theme_class' => 'royal',
+            'price' => 499,
+            'is_active' => false,
+            'sort_order' => 1,
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.templates.index'))
+            ->assertOk()
+            ->assertSee('name="csrf-token"', false)
+            ->assertSee('data-template-status-select', false)
+            ->assertSee('Change Inline Status Wedding status');
+
+        $this->actingAs($admin)
+            ->patchJson(route('admin.templates.status', $template), ['status' => 'active'])
+            ->assertOk()
+            ->assertJson([
+                'success' => true,
+                'status' => 'active',
+            ]);
+
+        $this->assertTrue($template->fresh()->is_active);
+
+        $this->get(route('templates.index'))
+            ->assertOk()
+            ->assertSee('Inline Status Wedding');
+
+        $this->actingAs($admin)
+            ->patchJson(route('admin.templates.status', $template), ['status' => 'hidden'])
+            ->assertOk()
+            ->assertJson([
+                'success' => true,
+                'status' => 'hidden',
+            ]);
+
+        $this->assertFalse($template->fresh()->is_active);
+
+        $this->get(route('templates.index'))
+            ->assertOk()
+            ->assertDontSee('Inline Status Wedding');
+    }
+
+    public function test_template_status_route_requires_admin_user(): void
+    {
+        $user = User::factory()->create(['is_admin' => false]);
+        $template = InvitationTemplate::create([
+            'name' => 'Protected Status Wedding',
+            'category' => 'Wedding',
+            'theme_class' => 'royal',
+            'price' => 499,
+            'is_active' => true,
+            'sort_order' => 1,
+        ]);
+
+        $this->actingAs($user)
+            ->patchJson(route('admin.templates.status', $template), ['status' => 'hidden'])
+            ->assertForbidden();
+
+        $this->assertTrue($template->fresh()->is_active);
+    }
+
+    public function test_admin_templates_index_filters_by_category_and_status(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $wedding = TemplateCategory::where('slug', 'wedding')->firstOrFail();
+        $engagement = TemplateCategory::where('slug', 'engagement')->firstOrFail();
+
+        InvitationTemplate::create([
+            'name' => 'Admin Wedding Active',
+            'slug' => 'admin-wedding-active',
+            'category' => 'Wedding',
+            'category_id' => $wedding->id,
+            'theme_class' => 'royal',
+            'price' => 499,
+            'is_active' => true,
+            'sort_order' => 1,
+        ]);
+
+        InvitationTemplate::create([
+            'name' => 'Admin Wedding Hidden',
+            'slug' => 'admin-wedding-hidden',
+            'category' => 'Wedding',
+            'category_id' => $wedding->id,
+            'theme_class' => 'minimal',
+            'price' => 499,
+            'is_active' => false,
+            'sort_order' => 2,
+        ]);
+
+        InvitationTemplate::create([
+            'name' => 'Admin Engagement Active',
+            'slug' => 'admin-engagement-active',
+            'category' => 'Engagement',
+            'category_id' => $engagement->id,
+            'theme_class' => 'floral',
+            'price' => 499,
+            'is_active' => true,
+            'sort_order' => 3,
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.templates.index'))
+            ->assertOk()
+            ->assertSee('All Categories')
+            ->assertSee('Wedding')
+            ->assertSee('Engagement')
+            ->assertSee('Admin Wedding Active')
+            ->assertSee('Admin Wedding Hidden')
+            ->assertSee('Admin Engagement Active')
+            ->assertSee('href="'.route('admin.templates.index').'"', false);
+
+        $this->actingAs($admin)
+            ->get(route('admin.templates.index', ['category_id' => $wedding->id]))
+            ->assertOk()
+            ->assertSee('Admin Wedding Active')
+            ->assertSee('Admin Wedding Hidden')
+            ->assertDontSee('Admin Engagement Active')
+            ->assertSee('value="'.$wedding->id.'" selected', false);
+
+        $this->actingAs($admin)
+            ->get(route('admin.templates.index', ['category_id' => $wedding->id, 'status' => 'hidden']))
+            ->assertOk()
+            ->assertSee('Admin Wedding Hidden')
+            ->assertDontSee('Admin Wedding Active')
+            ->assertDontSee('Admin Engagement Active')
+            ->assertSee('value="hidden" selected', false);
+    }
+
+    public function test_admin_templates_filter_preserves_query_string_in_pagination_and_empty_state(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $wedding = TemplateCategory::where('slug', 'wedding')->firstOrFail();
+        $birthday = TemplateCategory::where('slug', 'birthday')->firstOrFail();
+
+        foreach (range(1, 13) as $index) {
+            InvitationTemplate::create([
+                'name' => 'Paged Wedding '.$index,
+                'slug' => 'paged-wedding-'.$index,
+                'category' => 'Wedding',
+                'category_id' => $wedding->id,
+                'theme_class' => 'royal',
+                'price' => 499,
+                'is_active' => true,
+                'sort_order' => $index,
+            ]);
+        }
+
+        $this->actingAs($admin)
+            ->get(route('admin.templates.index', ['category_id' => $wedding->id]))
+            ->assertOk()
+            ->assertSee('Paged Wedding 1')
+            ->assertSee('category_id='.$wedding->id, false);
+
+        $this->actingAs($admin)
+            ->get(route('admin.templates.index', ['category_id' => $birthday->id, 'status' => 'hidden']))
+            ->assertOk()
+            ->assertSee('No templates found in this category.')
+            ->assertSee('Clear Filter')
+            ->assertSee('href="'.route('admin.templates.index').'"', false);
+    }
+
     public function test_search_and_category_filters_work_together(): void
     {
         $wedding = TemplateCategory::where('slug', 'wedding')->firstOrFail();
@@ -243,5 +413,60 @@ class TemplateCategoryLibraryTest extends TestCase
 
         $this->get(route('templates.show', 'hidden-category-template'))->assertNotFound();
         $this->get(route('templates.show', 'inactive-wedding-template'))->assertNotFound();
+    }
+
+    public function test_homepage_template_cards_are_full_clickable_links_for_active_templates(): void
+    {
+        TemplateCategory::query()->delete();
+
+        $wedding = TemplateCategory::create(['name' => 'Wedding', 'slug' => 'wedding', 'is_active' => true, 'sort_order' => 1]);
+
+        $activeTemplate = InvitationTemplate::create([
+            'name' => 'Royal Saffron Vows',
+            'slug' => 'royal-saffron-vows',
+            'category' => 'Wedding',
+            'category_id' => $wedding->id,
+            'theme_class' => 'royal',
+            'price' => 499,
+            'is_active' => true,
+            'sort_order' => 1,
+        ]);
+
+        InvitationTemplate::create([
+            'name' => 'Hidden Saffron Vows',
+            'slug' => 'hidden-saffron-vows',
+            'category' => 'Wedding',
+            'category_id' => $wedding->id,
+            'theme_class' => 'royal',
+            'price' => 499,
+            'is_active' => false,
+            'sort_order' => 2,
+        ]);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('Beautiful Templates for You')
+            ->assertSee('class="template-card-link"', false)
+            ->assertSee('href="'.route('templates.show', $activeTemplate->slug).'"', false)
+            ->assertSee('aria-label="View Royal Saffron Vows template"', false)
+            ->assertSee('Royal Saffron Vows')
+            ->assertDontSee('Hidden Saffron Vows');
+    }
+
+    public function test_homepage_event_cards_mark_non_wedding_events_as_coming_soon(): void
+    {
+        $response = $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('View Wedding templates')
+            ->assertSee('href="'.route('templates.index', ['category' => 'wedding']).'"', false)
+            ->assertSee('Engagement - Coming Soon')
+            ->assertSee('Birthday - Coming Soon')
+            ->assertSee('Mundan Ceremony - Coming Soon')
+            ->assertSee('Griha Pravesh - Coming Soon');
+
+        $html = $response->getContent();
+
+        $this->assertSame(4, substr_count($html, 'class="coming-soon-badge"'));
+        $this->assertStringNotContainsString('Wedding - Coming Soon', $html);
     }
 }

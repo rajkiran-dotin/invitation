@@ -335,6 +335,10 @@ class InvitationController extends Controller
 
     private function publicView(Invitation $invitation): string
     {
+        if (in_array($invitation->template?->slug, ['royal-wedding', 'royal-saffron-vows'], true)) {
+            return 'invitations.public.royal_saffron_vows';
+        }
+
         $view = $invitation->template?->view_name ?: 'invitations.public.default';
 
         return view()->exists($view) ? $view : 'invitations.public.default';
