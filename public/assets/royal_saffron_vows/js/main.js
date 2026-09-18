@@ -804,8 +804,8 @@ function initRSVPValidation() {
     }
     const payload = Object.fromEntries(new FormData(form).entries());
     try {
-      await submitRsvp(payload);
-      feedback.textContent = "Thank you. Your RSVP has been received for this demo.";
+      const result = await submitRsvp(payload);
+      feedback.textContent = result.preview ? "Preview mode - RSVP is disabled." : "Thank you. Your RSVP has been received for this demo.";
       form.reset();
     } catch (error) {
       feedback.textContent = "We could not submit your RSVP. Please try again.";
@@ -815,6 +815,11 @@ function initRSVPValidation() {
 }
 
 async function submitRsvp(payload) {
+  if (window.InviteCraftPreviewMode) {
+    await new Promise((resolve) => window.setTimeout(resolve, 250));
+    return { ok: true, preview: true };
+  }
+
   console.info("RSVP demo payload", payload);
   await new Promise((resolve) => window.setTimeout(resolve, 350));
   return { ok: true };

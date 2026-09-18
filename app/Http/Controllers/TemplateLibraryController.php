@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\InvitationTemplate;
 use App\Models\TemplateCategory;
+use App\Services\TemplatePreviewService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -55,6 +56,20 @@ class TemplateLibraryController extends Controller
             ->get();
 
         return view('templates.show', compact('template', 'relatedTemplates'));
+    }
+
+    public function preview(InvitationTemplate $template, TemplatePreviewService $previewService): View
+    {
+        $template->load('templateCategory');
+
+        abort_unless($template->is_active && $template->templateCategory?->is_active, 404);
+
+        return view('templates.preview', [
+            'template' => $template,
+            'invitation' => $previewService->invitationFor($template),
+            'publicView' => $previewService->publicViewFor($template),
+            'isPreview' => true,
+        ]);
     }
 
     public function select(InvitationTemplate $template, Request $request): RedirectResponse

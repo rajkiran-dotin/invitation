@@ -382,6 +382,16 @@ class TemplateCategoryLibraryTest extends TestCase
         $this->get(route('templates.show', $template->slug))
             ->assertOk()
             ->assertSee('Preview Wedding')
+            ->assertSee('Live Preview')
+            ->assertSee('Use This Template');
+
+        $this->get(route('templates.preview', $template->slug))
+            ->assertOk()
+            ->assertSee('InviteCraft Preview')
+            ->assertSee('Preview Wedding')
+            ->assertSee('Priya')
+            ->assertSee('Rahul')
+            ->assertSee('Haldi')
             ->assertSee('Use This Template');
 
         $this->get(route('templates.use', $template->slug))
@@ -413,6 +423,41 @@ class TemplateCategoryLibraryTest extends TestCase
 
         $this->get(route('templates.show', 'hidden-category-template'))->assertNotFound();
         $this->get(route('templates.show', 'inactive-wedding-template'))->assertNotFound();
+        $this->get(route('templates.preview', 'hidden-category-template'))->assertNotFound();
+        $this->get(route('templates.preview', 'inactive-wedding-template'))->assertNotFound();
+    }
+
+    public function test_royal_template_live_preview_uses_actual_dynamic_template(): void
+    {
+        $category = TemplateCategory::where('slug', 'wedding')->firstOrFail();
+        $template = InvitationTemplate::create([
+            'name' => 'Royal Saffron Vows',
+            'slug' => 'royal-saffron-vows',
+            'category' => 'Wedding',
+            'category_id' => $category->id,
+            'description' => 'Royal live invitation.',
+            'theme_class' => 'royal',
+            'view_name' => 'invitations.public.royal_saffron_vows',
+            'price' => 499,
+            'is_premium' => true,
+            'is_active' => true,
+            'sort_order' => 1,
+        ]);
+
+        $this->get(route('templates.preview', $template->slug))
+            ->assertOk()
+            ->assertSee('InviteCraft Preview')
+            ->assertSee('Royal Saffron Vows')
+            ->assertSee('window.InviteCraftWeddingData', false)
+            ->assertSee('window.InviteCraftPreviewMode = true', false)
+            ->assertSee('Open Invitation')
+            ->assertSee('Priya')
+            ->assertSee('Rahul')
+            ->assertSee('Haldi')
+            ->assertSee('Mehendi')
+            ->assertSee('Sangeet')
+            ->assertSee('Wedding')
+            ->assertSee('Reception');
     }
 
     public function test_homepage_template_cards_are_full_clickable_links_for_active_templates(): void

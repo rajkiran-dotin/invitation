@@ -55,6 +55,7 @@
                     <div class="market-template-meta detail-meta">
                         <span>{{ $template->templateCategory?->name ?? $template->category }}</span>
                         <b>{{ $template->is_premium ? 'Premium' : 'Free' }}</b>
+                        <em>{{ ucfirst($template->theme_class) }}</em>
                     </div>
                     <p>{{ $template->description ?: 'Beautiful digital invitation template for your special celebration.' }}</p>
                     @if (! empty($template->features))
@@ -65,7 +66,7 @@
                         </ul>
                     @endif
                     <div class="template-detail-actions">
-                        <a class="btn btn-light" href="{{ $template->demo_url ?: route('templates.show', $template->slug) }}">Preview Live</a>
+                        <a class="btn btn-light" href="{{ route('templates.preview', $template->slug) }}">Live Preview</a>
                         <a class="btn btn-primary" href="{{ route('templates.use', $template->slug) }}">Use This Template</a>
                     </div>
                 </div>

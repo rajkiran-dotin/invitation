@@ -93,7 +93,7 @@
                                 <h2><a href="{{ route('templates.show', $template->slug) }}">{{ $template->name }}</a></h2>
                                 <p>{{ $template->description ?: ucfirst($template->theme_class).' invitation template.' }}</p>
                                 <div class="market-template-actions">
-                                    <a class="btn btn-light" href="{{ route('templates.show', $template->slug) }}">Preview</a>
+                                    <a class="btn btn-light" href="{{ route('templates.preview', $template->slug) }}">Live Preview</a>
                                     <a class="btn btn-primary" href="{{ route('templates.use', $template->slug) }}">Use Template</a>
                                 </div>
                             </div>

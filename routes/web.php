@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [LandingController::class, 'index'])->middleware('track.site.visit')->name('home');
 Route::get('/templates', [TemplateLibraryController::class, 'index'])->name('templates.index');
+Route::get('/templates/{template:slug}/preview', [TemplateLibraryController::class, 'preview'])->name('templates.preview');
 Route::get('/templates/{template:slug}', [TemplateLibraryController::class, 'show'])->name('templates.show');
 Route::get('/templates/{template:slug}/use', [TemplateLibraryController::class, 'select'])->name('templates.use');
 Route::post('/enquiry', [LandingController::class, 'enquiry'])->name('enquiry.store');

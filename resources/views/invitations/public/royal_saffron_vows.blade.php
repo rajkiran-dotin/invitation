@@ -2,9 +2,10 @@
     use Illuminate\Support\Carbon;
     use Illuminate\Support\Facades\Storage;
     use Illuminate\Support\Js;
+    use Illuminate\Support\Str;
 
     $assetBase = 'assets/royal_saffron_vows';
-    $storageUrl = fn (?string $path): ?string => $path ? Storage::url($path) : null;
+    $storageUrl = fn (?string $path): ?string => $path ? (Str::startsWith($path, ['http://', 'https://', '//']) ? $path : Storage::url($path)) : null;
     $settings = array_merge([
         'music_enabled' => false,
         'rsvp_enabled' => true,
@@ -286,6 +287,7 @@
 
 <script>
     window.InviteCraftWeddingData = {{ Js::from($weddingData) }};
+    window.InviteCraftPreviewMode = @json($isPreview ?? false);
 </script>
 <script src="https://unpkg.com/aos@2.3.4/dist/aos.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>

@@ -1,6 +1,13 @@
+@php
+    use Illuminate\Support\Facades\Storage;
+    use Illuminate\Support\Str;
+
+    $mediaUrl = fn (?string $path): ?string => $path ? (Str::startsWith($path, ['http://', 'https://', '//']) ? $path : Storage::url($path)) : null;
+@endphp
+
 <section class="public-invite invitation-render">
     @if ($invitation->hero_photo_path)
-        <img class="public-hero" src="{{ Storage::url($invitation->hero_photo_path) }}" alt="{{ $invitation->bride_name }} and {{ $invitation->groom_name }}">
+        <img class="public-hero" src="{{ $mediaUrl($invitation->hero_photo_path) }}" alt="{{ $invitation->bride_name }} and {{ $invitation->groom_name }}">
     @endif
     <p class="eyebrow">Wedding Invitation</p>
     <h1>{{ $invitation->bride_name ?: 'Bride' }} <span>&amp;</span> {{ $invitation->groom_name ?: 'Groom' }}</h1>
@@ -65,7 +72,7 @@
             <h2>Gallery</h2>
             <div>
                 @foreach ($invitation->galleryImages as $image)
-                    <img src="{{ Storage::url($image->image_path) }}" alt="Invitation gallery image">
+                    <img src="{{ $mediaUrl($image->image_path) }}" alt="Invitation gallery image">
                 @endforeach
             </div>
         </section>

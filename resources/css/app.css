@@ -994,10 +994,12 @@ svg {
 }
 
 .market-template-meta span,
-.market-template-meta b {
+.market-template-meta b,
+.market-template-meta em {
     border-radius: 999px;
     display: inline-flex;
     font-size: .72rem;
+    font-style: normal;
     font-weight: 900;
     line-height: 1;
     padding: 7px 10px;
@@ -1011,6 +1013,11 @@ svg {
 .market-template-meta b {
     background: #fff8db;
     color: #8a6100;
+}
+
+.market-template-meta em {
+    background: #eef4ff;
+    color: #315f9d;
 }
 
 .market-template-body h2 {
@@ -1158,6 +1165,64 @@ svg {
     max-width: 520px;
     padding: 14px 16px;
 }
+
+.template-preview-body {
+    background: #fff;
+}
+
+.template-preview-bar {
+    align-items: center;
+    background: rgb(255 255 255 / 96%);
+    border-bottom: 1px solid var(--line);
+    box-shadow: 0 10px 24px rgb(39 31 64 / 8%);
+    display: flex;
+    gap: 16px;
+    justify-content: space-between;
+    min-height: 72px;
+    padding: 10px max(18px, calc((100vw - 1204px) / 2));
+    position: sticky;
+    top: 0;
+    z-index: 200;
+}
+
+.template-preview-bar span {
+    color: var(--purple);
+    display: block;
+    font-size: .72rem;
+    font-weight: 900;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.template-preview-bar strong {
+    color: var(--ink);
+    display: block;
+    font-size: 1rem;
+    font-weight: 900;
+    margin-top: 2px;
+}
+
+.template-preview-bar nav {
+    align-items: center;
+    display: flex;
+    gap: 10px;
+}
+
+.template-preview-bar .btn {
+    min-height: 40px;
+    padding: 0 16px;
+}
+
+.template-live-preview-shell .opening-screen,
+.template-live-preview-shell .site-header,
+.template-live-preview-shell .floating-music-control {
+    top: 72px;
+}
+
+.template-live-preview-shell .opening-screen {
+    height: calc(100vh - 72px);
+}
+
 .pricing {
     background: linear-gradient(180deg, #fff, #fbf7ff);
     max-width: none;
@@ -2390,6 +2455,16 @@ svg {
     .market-template-actions,
     .template-detail-actions {
         grid-template-columns: 1fr;
+    }
+
+    .template-preview-bar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .template-preview-bar nav {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .template-category-pills a {
