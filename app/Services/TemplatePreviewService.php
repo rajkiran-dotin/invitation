@@ -53,10 +53,6 @@ class TemplatePreviewService
 
     public function publicViewFor(InvitationTemplate $template): string
     {
-        if (in_array($template->slug, ['royal-wedding', 'royal-saffron-vows'], true)) {
-            return 'invitations.public.royal_saffron_vows';
-        }
-
         $view = $template->view_name ?: 'invitations.public.default';
 
         return view()->exists($view) ? $view : 'invitations.public.default';

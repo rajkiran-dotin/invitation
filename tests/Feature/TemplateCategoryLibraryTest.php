@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Invitation;
 use App\Models\InvitationTemplate;
 use App\Models\TemplateCategory;
 use App\Models\User;
@@ -407,6 +408,126 @@ class TemplateCategoryLibraryTest extends TestCase
             ->assertSessionHas('selected_template_id', $template->id);
     }
 
+    public function test_invitation_builder_saves_separate_google_venues_for_each_function(): void
+    {
+        $user = User::factory()->create(['is_admin' => false]);
+        $category = TemplateCategory::where('slug', 'wedding')->firstOrFail();
+        $template = InvitationTemplate::create([
+            'name' => 'Venue Wedding',
+            'slug' => 'venue-wedding',
+            'category' => 'Wedding',
+            'category_id' => $category->id,
+            'theme_class' => 'royal',
+            'price' => 499,
+            'is_active' => true,
+            'sort_order' => 1,
+        ]);
+        $invitation = Invitation::create([
+            'user_id' => $user->id,
+            'template_id' => $template->id,
+            'status' => Invitation::Draft,
+            'settings' => [],
+        ]);
+
+        $this->actingAs($user)
+            ->put(route('invitations.update', $invitation), [
+                'template_id' => $template->id,
+                'bride_name' => 'Priya',
+                'groom_name' => 'Rahul',
+                'wedding_date' => '2036-12-25',
+                'venue_name' => 'Main Palace',
+                'formatted_address' => 'Main Palace Road, Jaipur',
+                'google_place_id' => 'main-place-id',
+                'latitude' => '26.9124',
+                'longitude' => '75.7873',
+                'ceremonies' => [
+                    [
+                        'name' => 'Haldi',
+                        'date' => '2036-12-23',
+                        'venue_name' => 'Raj Estate Lawn',
+                        'formatted_address' => 'Raj Estate Lawn, Jaipur, Rajasthan',
+                        'google_place_id' => 'haldi-place-id',
+                        'latitude' => '26.9001',
+                        'longitude' => '75.8001',
+                    ],
+                    [
+                        'name' => 'Mehendi',
+                        'date' => '2036-12-24',
+                        'venue_name' => 'City Garden',
+                        'formatted_address' => 'City Garden, Jaipur, Rajasthan',
+                        'google_place_id' => 'mehendi-place-id',
+                        'latitude' => '26.9102',
+                        'longitude' => '75.8102',
+                    ],
+                ],
+            ])
+            ->assertRedirect(route('invitations.edit', $invitation));
+
+        $invitation->refresh()->load('ceremonies');
+
+        $this->assertSame('https://www.google.com/maps/search/?api=1&query=Main%20Palace%2C%20Main%20Palace%20Road%2C%20Jaipur&query_place_id=main-place-id', $invitation->google_maps_url);
+
+        $haldi = $invitation->ceremonies->firstWhere('name', 'Haldi');
+        $mehendi = $invitation->ceremonies->firstWhere('name', 'Mehendi');
+
+        $this->assertSame('Raj Estate Lawn', $haldi->venue_name);
+        $this->assertSame('Raj Estate Lawn, Jaipur, Rajasthan', $haldi->formatted_address);
+        $this->assertSame('haldi-place-id', $haldi->google_place_id);
+        $this->assertSame('26.9001000', $haldi->latitude);
+        $this->assertSame('75.8001000', $haldi->longitude);
+        $this->assertSame('https://www.google.com/maps/search/?api=1&query=Raj%20Estate%20Lawn%2C%20Raj%20Estate%20Lawn%2C%20Jaipur%2C%20Rajasthan&query_place_id=haldi-place-id', $haldi->google_maps_url);
+
+        $this->assertSame('City Garden', $mehendi->venue_name);
+        $this->assertSame('mehendi-place-id', $mehendi->google_place_id);
+        $this->assertNotSame($haldi->google_place_id, $mehendi->google_place_id);
+    }
+
+    public function test_builder_generates_fallback_maps_url_when_google_place_id_is_missing(): void
+    {
+        $user = User::factory()->create(['is_admin' => false]);
+        $category = TemplateCategory::where('slug', 'wedding')->firstOrFail();
+        $template = InvitationTemplate::create([
+            'name' => 'Manual Venue Wedding',
+            'slug' => 'manual-venue-wedding',
+            'category' => 'Wedding',
+            'category_id' => $category->id,
+            'theme_class' => 'royal',
+            'price' => 499,
+            'is_active' => true,
+            'sort_order' => 1,
+        ]);
+        $invitation = Invitation::create([
+            'user_id' => $user->id,
+            'template_id' => $template->id,
+            'status' => Invitation::Draft,
+            'settings' => [],
+        ]);
+
+        $this->actingAs($user)
+            ->put(route('invitations.update', $invitation), [
+                'template_id' => $template->id,
+                'bride_name' => 'Priya',
+                'groom_name' => 'Rahul',
+                'wedding_date' => '2036-12-25',
+                'ceremonies' => [
+                    [
+                        'name' => 'Wedding',
+                        'date' => '2036-12-25',
+                        'venue_name' => 'Manual Hall',
+                        'formatted_address' => 'Sector 10, Jaipur',
+                    ],
+                ],
+            ])
+            ->assertRedirect(route('invitations.edit', $invitation));
+
+        $ceremony = $invitation->fresh()->ceremonies()->firstOrFail();
+
+        $this->assertNull($ceremony->google_place_id);
+        $this->assertNull($ceremony->latitude);
+        $this->assertNull($ceremony->longitude);
+        $this->assertSame('https://www.google.com/maps/search/?api=1&query=Manual%20Hall%2C%20Sector%2010%2C%20Jaipur', $ceremony->google_maps_url);
+    }
+
     public function test_inactive_categories_and_templates_are_hidden_from_library(): void
     {
         $hiddenCategory = TemplateCategory::create(['name' => 'Hidden Category', 'slug' => 'hidden-category', 'is_active' => false, 'sort_order' => 99]);
@@ -427,17 +548,17 @@ class TemplateCategoryLibraryTest extends TestCase
         $this->get(route('templates.preview', 'inactive-wedding-template'))->assertNotFound();
     }
 
-    public function test_royal_template_live_preview_uses_actual_dynamic_template(): void
+    public function test_template_live_preview_falls_back_when_custom_view_is_missing(): void
     {
         $category = TemplateCategory::where('slug', 'wedding')->firstOrFail();
         $template = InvitationTemplate::create([
-            'name' => 'Royal Saffron Vows',
-            'slug' => 'royal-saffron-vows',
+            'name' => 'Archived Wedding Preview',
+            'slug' => 'archived-wedding-preview',
             'category' => 'Wedding',
             'category_id' => $category->id,
-            'description' => 'Royal live invitation.',
+            'description' => 'Archived live invitation.',
             'theme_class' => 'royal',
-            'view_name' => 'invitations.public.royal_saffron_vows',
+            'view_name' => 'invitations.public.archived_wedding_preview',
             'price' => 499,
             'is_premium' => true,
             'is_active' => true,
@@ -447,10 +568,9 @@ class TemplateCategoryLibraryTest extends TestCase
         $this->get(route('templates.preview', $template->slug))
             ->assertOk()
             ->assertSee('InviteCraft Preview')
-            ->assertSee('Royal Saffron Vows')
-            ->assertSee('window.InviteCraftWeddingData', false)
-            ->assertSee('window.InviteCraftPreviewMode = true', false)
-            ->assertSee('Open Invitation')
+            ->assertSee('Archived Wedding Preview')
+            ->assertDontSee('window.InviteCraftWeddingData', false)
+            ->assertDontSee('window.InviteCraftPreviewMode = true', false)
             ->assertSee('Priya')
             ->assertSee('Rahul')
             ->assertSee('Haldi')
@@ -467,8 +587,8 @@ class TemplateCategoryLibraryTest extends TestCase
         $wedding = TemplateCategory::create(['name' => 'Wedding', 'slug' => 'wedding', 'is_active' => true, 'sort_order' => 1]);
 
         $activeTemplate = InvitationTemplate::create([
-            'name' => 'Royal Saffron Vows',
-            'slug' => 'royal-saffron-vows',
+            'name' => 'Classic Wedding Card',
+            'slug' => 'classic-wedding-card',
             'category' => 'Wedding',
             'category_id' => $wedding->id,
             'theme_class' => 'royal',
@@ -493,8 +613,8 @@ class TemplateCategoryLibraryTest extends TestCase
             ->assertSee('Beautiful Templates for You')
             ->assertSee('class="template-card-link"', false)
             ->assertSee('href="'.route('templates.show', $activeTemplate->slug).'"', false)
-            ->assertSee('aria-label="View Royal Saffron Vows template"', false)
-            ->assertSee('Royal Saffron Vows')
+            ->assertSee('aria-label="View Classic Wedding Card template"', false)
+            ->assertSee('Classic Wedding Card')
             ->assertDontSee('Hidden Saffron Vows');
     }
 

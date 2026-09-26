@@ -190,12 +190,12 @@ class InvitationController extends Controller
             'wedding_date' => ['required', 'date'],
             'wedding_time' => ['nullable', 'date_format:H:i'],
             'message' => ['nullable', 'string', 'max:2000'],
-            'venue_name' => ['nullable', 'string', 'max:180'],
+            'venue_name' => ['nullable', 'string', 'max:255'],
             'formatted_address' => ['nullable', 'string', 'max:500'],
             'google_place_id' => ['nullable', 'string', 'max:255'],
             'latitude' => ['nullable', 'numeric', 'between:-90,90'],
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
-            'google_maps_url' => ['nullable', 'url', 'max:500'],
+            'google_maps_url' => ['nullable', 'url', 'max:2048'],
             'settings' => ['nullable', 'array'],
             'settings.music_enabled' => ['nullable', 'boolean'],
             'settings.rsvp_enabled' => ['nullable', 'boolean'],
@@ -208,12 +208,12 @@ class InvitationController extends Controller
             'ceremonies.*.date' => ['required_with:ceremonies', 'date'],
             'ceremonies.*.description' => ['nullable', 'string', 'max:1000'],
             'ceremonies.*.dress_code' => ['nullable', 'string', 'max:120'],
-            'ceremonies.*.venue_name' => ['nullable', 'string', 'max:180'],
+            'ceremonies.*.venue_name' => ['nullable', 'string', 'max:255'],
             'ceremonies.*.formatted_address' => ['nullable', 'string', 'max:500'],
             'ceremonies.*.google_place_id' => ['nullable', 'string', 'max:255'],
             'ceremonies.*.latitude' => ['nullable', 'numeric', 'between:-90,90'],
             'ceremonies.*.longitude' => ['nullable', 'numeric', 'between:-180,180'],
-            'ceremonies.*.google_maps_url' => ['nullable', 'url', 'max:500'],
+            'ceremonies.*.google_maps_url' => ['nullable', 'url', 'max:2048'],
             'ceremonies.*.image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:3072'],
             'gallery_images.*' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
         ];
@@ -335,10 +335,6 @@ class InvitationController extends Controller
 
     private function publicView(Invitation $invitation): string
     {
-        if (in_array($invitation->template?->slug, ['royal-wedding', 'royal-saffron-vows'], true)) {
-            return 'invitations.public.royal_saffron_vows';
-        }
-
         $view = $invitation->template?->view_name ?: 'invitations.public.default';
 
         return view()->exists($view) ? $view : 'invitations.public.default';
