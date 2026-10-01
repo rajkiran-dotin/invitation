@@ -53,7 +53,7 @@
                         $ceremonyMapsUrl = $query ? 'https://www.google.com/maps/search/?'.http_build_query($params, '', '&', PHP_QUERY_RFC3986) : null;
                     }
                 @endphp
-                <article>
+                <article class="event-card event-card--{{ $ceremony->slug ?: Str::slug($ceremony->name) }}">
                     <h3>{{ $ceremony->name }}</h3>
                     <p>{{ optional($ceremony->date)->format('d M Y') }}</p>
                     <p>{{ $ceremony->description }}</p>
@@ -77,4 +77,87 @@
             </div>
         </section>
     @endif
+    @if ($invitation->settings['rsvp_enabled'] ?? true)
+        <section class="public-rsvp">
+            <h2>RSVP</h2>
+            @if (session('status'))
+                <p class="rsvp-status">{{ session('status') }}</p>
+            @endif
+            <form method="POST" action="{{ route('invitations.rsvp.store', $invitation->slug) }}">
+                @csrf
+                <label>
+                    Guest Name
+                    <input type="text" name="guest_name" value="{{ old('guest_name') }}" required maxlength="255">
+                    @error('guest_name')
+                        <small>{{ $message }}</small>
+                    @enderror
+                </label>
+                <fieldset>
+                    <legend>Will you attend?</legend>
+                    <label class="rsvp-option">
+                        <input type="radio" name="attending" value="1" @checked(old('attending', '1') === '1')>
+                        Yes
+                    </label>
+                    <label class="rsvp-option">
+                        <input type="radio" name="attending" value="0" @checked(old('attending') === '0')>
+                        No
+                    </label>
+                    @error('attending')
+                        <small>{{ $message }}</small>
+                    @enderror
+                </fieldset>
+                @if ($invitation->ceremonies->isNotEmpty())
+                    <fieldset data-rsvp-functions>
+                        <legend>Functions Attending</legend>
+                        @foreach ($invitation->ceremonies as $ceremony)
+                            <label class="rsvp-option">
+                                <input type="checkbox" name="functions_attending[]" value="{{ $ceremony->id }}" @checked(in_array((string) $ceremony->id, (array) old('functions_attending', []), true))>
+                                {{ $ceremony->name }}
+                            </label>
+                        @endforeach
+                        @error('functions_attending')
+                            <small>{{ $message }}</small>
+                        @enderror
+                        @error('functions_attending.*')
+                            <small>{{ $message }}</small>
+                        @enderror
+                    </fieldset>
+                @endif
+                <label>
+                    Message/Blessings
+                    <textarea name="message" rows="4" maxlength="2000">{{ old('message') }}</textarea>
+                    @error('message')
+                        <small>{{ $message }}</small>
+                    @enderror
+                </label>
+                <button type="submit">Send RSVP</button>
+            </form>
+        </section>
+    @endif
 </section>
+
+<script>
+    document.querySelectorAll('.public-rsvp').forEach(function (section) {
+        const functions = section.querySelector('[data-rsvp-functions]');
+        const attendingInputs = section.querySelectorAll('input[name="attending"]');
+
+        function syncFunctions() {
+            const isAttending = section.querySelector('input[name="attending"]:checked')?.value !== '0';
+
+            if (! functions) {
+                return;
+            }
+
+            functions.hidden = ! isAttending;
+            functions.querySelectorAll('input').forEach(function (input) {
+                input.disabled = ! isAttending;
+            });
+        }
+
+        attendingInputs.forEach(function (input) {
+            input.addEventListener('change', syncFunctions);
+        });
+
+        syncFunctions();
+    });
+</script>

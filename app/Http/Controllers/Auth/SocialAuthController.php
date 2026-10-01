@@ -43,12 +43,14 @@ class SocialAuthController extends Controller
 
         $user = $this->findOrCreateUser($provider, $socialUser);
 
+        if ($user->is_admin) {
+            return redirect()
+                ->route('login')
+                ->withErrors(['email' => Str::headline($provider).' login is only available for customer accounts.']);
+        }
+
         Auth::login($user, true);
         request()->session()->regenerate();
-
-        if ($user->is_admin) {
-            return redirect()->intended(route('admin.dashboard'));
-        }
 
         if (request()->session()->has('selected_template_slug')) {
             return redirect()->route('invitations.create', ['template' => request()->session()->get('selected_template_slug')]);
@@ -64,6 +66,10 @@ class SocialAuthController extends Controller
         $user = User::query()->where('email', $email)->first();
 
         if ($user) {
+            if ($user->is_admin) {
+                return $user;
+            }
+
             $user->forceFill([
                 'provider' => $user->provider ?? $provider,
                 'provider_id' => $user->provider_id ?? $socialUser->getId(),

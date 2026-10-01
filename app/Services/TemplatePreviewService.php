@@ -7,6 +7,7 @@ use App\Models\InvitationCeremony;
 use App\Models\InvitationGalleryImage;
 use App\Models\InvitationTemplate;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Str;
 
 class TemplatePreviewService
 {
@@ -70,13 +71,14 @@ class TemplatePreviewService
             $model = new InvitationCeremony;
             $model->forceFill([
                 'name' => $ceremony[0],
+                'slug' => Str::slug($ceremony[0]),
                 'date' => $ceremony[1],
                 'start_time' => $ceremony[2],
                 'description' => $ceremony[4],
                 'venue_name' => $ceremony[3],
                 'formatted_address' => 'Jaipur, Rajasthan',
                 'google_maps_url' => 'https://www.google.com/maps/search/?api=1&query='.rawurlencode($ceremony[3].', Jaipur, Rajasthan'),
-                'sort_order' => $index,
+                'sort_order' => $index + 1,
             ]);
 
             return $model;

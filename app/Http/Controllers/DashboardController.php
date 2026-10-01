@@ -37,9 +37,25 @@ class DashboardController extends Controller
             'pageTitle' => 'My Invitations',
             'invitations' => Invitation::query()
                 ->with('template')
+                ->withCount('rsvps')
                 ->where('user_id', $request->user()->id)
                 ->latest()
                 ->get(),
+        ]);
+    }
+
+    public function rsvps(Request $request, Invitation $invitation): View
+    {
+        abort_unless((int) $invitation->user_id === (int) $request->user()->id, 403);
+
+        $invitation->load([
+            'ceremonies',
+            'rsvps' => fn ($query) => $query->latest(),
+        ]);
+
+        return view('dashboard.rsvps', [
+            'pageTitle' => 'RSVPs',
+            'invitation' => $invitation,
         ]);
     }
 

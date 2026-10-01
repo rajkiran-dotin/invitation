@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[Fillable([
     'invitation_id',
     'name',
+    'slug',
     'date',
     'start_time',
     'end_time',

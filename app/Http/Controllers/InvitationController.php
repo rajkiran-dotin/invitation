@@ -9,6 +9,7 @@ use App\Services\InvitationPublishingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -46,6 +47,7 @@ class InvitationController extends Controller
             'templates' => InvitationTemplate::query()->where('is_active', true)->orderBy('sort_order')->orderBy('name')->get(),
             'googleMapsApiKey' => config('services.google.maps_api_key'),
             'settings' => array_merge($this->defaultSettings(), $invitation->settings ?? []),
+            'weddingSides' => config('wedding.sides', []),
         ]);
     }
 
@@ -59,6 +61,7 @@ class InvitationController extends Controller
 
         $invitation->update([
             'template_id' => $validated['template_id'],
+            'wedding_side' => $validated['wedding_side'] ?? null,
             'bride_name' => $validated['bride_name'],
             'groom_name' => $validated['groom_name'],
             'bride_father_name' => $validated['bride_father_name'] ?? null,
@@ -179,6 +182,7 @@ class InvitationController extends Controller
     {
         return [
             'template_id' => ['required', 'integer', Rule::exists('invitation_templates', 'id')],
+            'wedding_side' => ['nullable', Rule::in(['bride', 'groom', 'both'])],
             'bride_name' => ['required', 'string', 'max:120'],
             'groom_name' => ['required', 'string', 'max:120'],
             'bride_photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:3072'],
@@ -204,7 +208,9 @@ class InvitationController extends Controller
             'settings.family_enabled' => ['nullable', 'boolean'],
             'ceremonies' => ['nullable', 'array'],
             'ceremonies.*.id' => ['nullable', 'integer'],
-            'ceremonies.*.name' => ['required_with:ceremonies', 'string', 'max:120'],
+            'ceremonies.*.name' => ['required_with:ceremonies', 'string', 'max:255'],
+            'ceremonies.*.slug' => ['nullable', 'string', 'max:255'],
+            'ceremonies.*.sort_order' => ['nullable', 'integer', 'min:0'],
             'ceremonies.*.date' => ['required_with:ceremonies', 'date'],
             'ceremonies.*.description' => ['nullable', 'string', 'max:1000'],
             'ceremonies.*.dress_code' => ['nullable', 'string', 'max:120'],
@@ -252,6 +258,7 @@ class InvitationController extends Controller
 
             $ceremony->fill([
                 'name' => $ceremonyData['name'],
+                'slug' => Str::slug($ceremonyData['slug'] ?? $ceremonyData['name']),
                 'date' => $ceremonyData['date'],
                 'start_time' => null,
                 'end_time' => null,
@@ -264,7 +271,7 @@ class InvitationController extends Controller
                 'latitude' => $ceremonyData['latitude'] ?? null,
                 'longitude' => $ceremonyData['longitude'] ?? null,
                 'google_maps_url' => $this->googleMapsUrl($ceremonyData['venue_name'] ?? null, $ceremonyData['formatted_address'] ?? null, $ceremonyData['google_place_id'] ?? null),
-                'sort_order' => $index,
+                'sort_order' => $ceremonyData['sort_order'] ?? $index + 1,
             ]);
             $ceremony->save();
             $keptIds[] = $ceremony->id;

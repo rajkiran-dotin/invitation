@@ -536,6 +536,79 @@ input:focus, textarea:focus { border-color: color-mix(in srgb, var(--purple) 44%
 .public-functions { display: grid; gap: 14px; }
 .public-functions article { border: 1px solid var(--line); border-radius: 8px; padding: 16px; background: #fff; }
 .public-functions h3 { color: var(--purple); }
+.public-rsvp,
+.public-rsvp form {
+    display: grid;
+    gap: 16px;
+}
+.public-rsvp {
+    text-align: left;
+}
+.public-rsvp h2,
+.public-rsvp .rsvp-status {
+    text-align: center;
+}
+.public-rsvp fieldset {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+}
+.public-rsvp legend {
+    padding: 0 6px;
+    color: #39354f;
+    font-weight: 900;
+}
+.public-rsvp small {
+    color: var(--danger);
+}
+.public-rsvp button {
+    justify-content: center;
+}
+.rsvp-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.rsvp-option input {
+    width: auto;
+    min-height: auto;
+}
+.rsvp-status {
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: var(--success-bg);
+    color: var(--success);
+    font-weight: 900;
+}
+.dashboard-table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 14px 32px rgb(39 31 64 / 7%);
+}
+.dashboard-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.dashboard-table th,
+.dashboard-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+    vertical-align: top;
+}
+.dashboard-table th {
+    color: var(--purple);
+    font-size: 13px;
+    text-transform: uppercase;
+}
+.dashboard-table tr:last-child td {
+    border-bottom: 0;
+}
 
 @media (max-width: 900px) {
     .builder-stepper { grid-template-columns: repeat(2, minmax(0, 1fr)); }

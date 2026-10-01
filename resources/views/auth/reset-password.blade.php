@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Reset Password - InviteCraft</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+</head>
+<body class="admin-login-page">
+    <form class="admin-login-card" method="POST" action="{{ route('password.update') }}">
+        @csrf
+        <a href="{{ route('home') }}" class="brand">
+            <span class="brand-mark"><svg viewBox="0 0 24 24"><path d="M4 8.5 12 3l8 5.5v11H4v-11Zm0 0 8 6 8-6"/></svg></span>
+            <span><strong>InviteCraft</strong><small>Make Every Moment Memorable</small></span>
+        </a>
+        <h1>Reset Password</h1>
+        <input type="hidden" name="token" value="{{ $token }}">
+        <label>Email Address<input type="email" name="email" value="{{ old('email', $email) }}" required autofocus autocomplete="email"></label>
+        <label>New Password<input type="password" name="password" required autocomplete="new-password"></label>
+        <label>Confirm Password<input type="password" name="password_confirmation" required autocomplete="new-password"></label>
+        @error('email')<p class="form-error">{{ $message }}</p>@enderror
+        @error('password')<p class="form-error">{{ $message }}</p>@enderror
+        @error('token')<p class="form-error">{{ $message }}</p>@enderror
+        <button type="submit" class="btn btn-primary">Reset Password</button>
+        <p class="auth-switch">Back to <a href="{{ route('login') }}">Login</a></p>
+    </form>
+</body>
+</html>

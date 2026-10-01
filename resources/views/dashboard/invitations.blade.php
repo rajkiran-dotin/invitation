@@ -29,9 +29,11 @@
                             <span class="badge {{ $invitation->status === 'published' ? 'success' : 'muted' }}">{{ ucfirst($invitation->status) }}</span>
                         </div>
                         <div class="views-count">{{ $invitation->views }} views</div>
+                        <div class="views-count">RSVPs: {{ $invitation->rsvps_count }}</div>
                         <div class="card-actions invitation-actions">
                             @if ($invitation->status === 'published' && $publicUrl)
                                 <a href="{{ $publicUrl }}" target="_blank" rel="noreferrer">View Live</a>
+                                <a href="{{ route('dashboard.invitations.rsvps', $invitation) }}">View RSVPs</a>
                                 <button type="button" data-copy="{{ $publicUrl }}">Copy Link</button>
                                 <a href="https://wa.me/?text={{ $shareText }}" target="_blank" rel="noreferrer">Share</a>
                                 <form method="POST" action="{{ route('invitations.unpublish', $invitation) }}">

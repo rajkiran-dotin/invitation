@@ -5,6 +5,8 @@
     $formattedAddress = $ceremony['formatted_address'] ?? '';
     $placeId = $ceremony['google_place_id'] ?? '';
     $mapUrl = $ceremony['google_maps_url'] ?? '';
+    $slug = $ceremony['slug'] ?? \Illuminate\Support\Str::slug($ceremony['name'] ?? '');
+    $sortOrder = $ceremony['sort_order'] ?? ((is_numeric($index) ? (int) $index : 0) + 1);
 
     if (! $mapUrl && ($venueName || $formattedAddress)) {
         $params = ['api' => '1', 'query' => trim(collect([$venueName, $formattedAddress])->filter()->implode(', '))];
@@ -18,12 +20,18 @@
 @endphp
 <article class="ceremony-card">
     <input type="hidden" name="{{ $prefix }}[id]" value="{{ $ceremony['id'] ?? '' }}">
+    <input type="hidden" name="{{ $prefix }}[slug]" value="{{ $slug }}" data-ceremony-slug>
+    <input type="hidden" name="{{ $prefix }}[sort_order]" value="{{ $sortOrder }}" data-ceremony-sort-order>
     <div class="section-heading compact">
         <h3>Function</h3>
-        <button type="button" class="secondary-action" data-remove-ceremony>Remove</button>
+        <div class="preview-actions">
+            <button type="button" class="secondary-action" data-move-ceremony="up">Up</button>
+            <button type="button" class="secondary-action" data-move-ceremony="down">Down</button>
+            <button type="button" class="secondary-action" data-remove-ceremony>Remove</button>
+        </div>
     </div>
     <div class="form-grid">
-        <label>Function Name *<input required name="{{ $prefix }}[name]" value="{{ $ceremony['name'] ?? '' }}" placeholder="Haldi, Mehendi, Wedding, Reception"></label>
+        <label>Function Name *<input required name="{{ $prefix }}[name]" value="{{ $ceremony['name'] ?? '' }}" placeholder="Haldi, Mehendi, Wedding, Reception" data-ceremony-name></label>
         <label>Date *<input required type="date" name="{{ $prefix }}[date]" value="{{ isset($ceremony['date']) ? \Illuminate\Support\Carbon::parse($ceremony['date'])->format('Y-m-d') : '' }}"></label>
         <label>Dress Code<input name="{{ $prefix }}[dress_code]" value="{{ $ceremony['dress_code'] ?? '' }}"></label>
         <label>Image<input type="file" name="{{ $prefix }}[image]" accept="image/*"></label>

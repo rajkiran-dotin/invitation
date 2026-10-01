@@ -1481,7 +1481,8 @@ svg {
 }
 
 .success-message,
-.admin-alert {
+.admin-alert,
+.form-status {
     background: #e9fbf1;
     border: 1px solid #bdebcf;
     border-radius: 8px;

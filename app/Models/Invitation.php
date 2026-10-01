@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable([
     'user_id',
     'template_id',
+    'wedding_side',
     'bride_name',
     'groom_name',
     'bride_photo_path',
@@ -73,6 +74,11 @@ class Invitation extends Model
     public function ceremonies(): HasMany
     {
         return $this->hasMany(InvitationCeremony::class)->orderBy('sort_order')->orderBy('date');
+    }
+
+    public function rsvps(): HasMany
+    {
+        return $this->hasMany(Rsvp::class);
     }
 
     public function galleryImages(): HasMany

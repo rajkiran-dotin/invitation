@@ -8,11 +8,14 @@ use App\Http\Controllers\Admin\TemplateCategoryController;
 use App\Http\Controllers\Admin\TemplateController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\DashboardController as UserDashboardController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\LandingController;
+use App\Http\Controllers\RsvpController;
 use App\Http\Controllers\TemplateLibraryController;
 use Illuminate\Support\Facades\Route;
 
@@ -23,13 +26,18 @@ Route::get('/templates/{template:slug}', [TemplateLibraryController::class, 'sho
 Route::get('/templates/{template:slug}/use', [TemplateLibraryController::class, 'select'])->name('templates.use');
 Route::post('/enquiry', [LandingController::class, 'enquiry'])->name('enquiry.store');
 Route::get('/invite/{slug}', [InvitationController::class, 'showPublic'])->name('invitations.public');
+Route::post('/invite/{slug}/rsvp', [RsvpController::class, 'store'])->name('invitations.rsvp.store');
 
 Route::middleware('guest')->group(function (): void {
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
     Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('login.store');
     Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
     Route::post('/register', [RegisteredUserController::class, 'store'])->name('register.store');
-    Route::get('/auth/google/redirect', [SocialAuthController::class, 'redirectToGoogle'])->name('auth.google.redirect');
+    Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');
+    Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])->name('password.email');
+    Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
+    Route::post('/reset-password', [NewPasswordController::class, 'store'])->name('password.update');
+    Route::get('/auth/google', [SocialAuthController::class, 'redirectToGoogle'])->name('auth.google.redirect');
     Route::get('/auth/google/callback', [SocialAuthController::class, 'handleGoogleCallback'])->name('auth.google.callback');
 });
 
@@ -39,6 +47,7 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
     Route::prefix('dashboard')->name('dashboard.')->group(function (): void {
         Route::get('/invitations', [UserDashboardController::class, 'invitations'])->name('invitations');
+        Route::get('/invitations/{invitation}/rsvps', [UserDashboardController::class, 'rsvps'])->name('invitations.rsvps');
         Route::get('/create', fn () => redirect()->route('invitations.create'))->name('create');
         Route::get('/profile', [UserDashboardController::class, 'profile'])->name('profile');
         Route::put('/profile', [UserDashboardController::class, 'updateProfile'])->name('profile.update');

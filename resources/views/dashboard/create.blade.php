@@ -51,24 +51,40 @@
         </section>
 
         <section class="flow-step" data-step="2">
+            @php
+                $selectedWeddingSide = old('wedding_side', $invitation->wedding_side ?: 'both');
+                $savedCeremonies = $invitation->ceremonies->map(fn ($ceremony) => $ceremony->toArray())->all();
+                $ceremonies = old('ceremonies');
+
+                if ($ceremonies === null) {
+                    $ceremonies = $savedCeremonies ?: collect($weddingSides[$selectedWeddingSide] ?? [])->map(fn (array $ceremony, int $index) => [
+                        'name' => $ceremony['name'],
+                        'slug' => $ceremony['slug'],
+                        'date' => optional($invitation->wedding_date)->format('Y-m-d'),
+                        'sort_order' => $index + 1,
+                    ])->all();
+                }
+            @endphp
             <div class="section-heading">
                 <h2>Wedding Functions</h2>
                 <button type="button" class="secondary-action" id="addCeremony">Add Function</button>
             </div>
+            <fieldset class="settings-grid" id="weddingSideOptions">
+                <legend>Whose side is this invitation for?</legend>
+                <label class="toggle-row"><input type="radio" name="wedding_side" value="bride" @checked($selectedWeddingSide === 'bride')> Bride Side</label>
+                <label class="toggle-row"><input type="radio" name="wedding_side" value="groom" @checked($selectedWeddingSide === 'groom')> Groom Side</label>
+                <label class="toggle-row"><input type="radio" name="wedding_side" value="both" @checked($selectedWeddingSide === 'both')> Both Families</label>
+            </fieldset>
             <div id="ceremonyList" class="builder-list">
-                @php($ceremonies = old('ceremonies', $invitation->ceremonies->map(fn ($ceremony) => $ceremony->toArray())->all()))
-                @forelse ($ceremonies as $index => $ceremony)
+                @foreach ($ceremonies as $index => $ceremony)
                     @include('invitations.partials.ceremony-fields', ['index' => $index, 'ceremony' => (array) $ceremony])
-                @empty
-                    @include('invitations.partials.ceremony-fields', ['index' => 0, 'ceremony' => ['name' => 'Wedding', 'date' => optional($invitation->wedding_date)->format('Y-m-d')]])
-                @endforelse
+                @endforeach
             </div>
             <div class="flow-actions split">
                 <button type="button" class="secondary-action" data-prev-step="1">Back</button>
                 <button type="button" class="primary-action" data-next-step="3">Save & Continue</button>
             </div>
         </section>
-
         <section class="flow-step" data-step="3">
             <div class="section-heading"><h2>Main Venue & Locations</h2></div>
             <div class="form-grid">
@@ -160,6 +176,10 @@
     const nextAction = document.getElementById('nextAction');
     const ceremonyList = document.getElementById('ceremonyList');
     const ceremonyTemplate = document.getElementById('ceremonyTemplate');
+    const weddingPresets = @json($weddingSides);
+    const defaultWeddingDate = @json(old('wedding_date', optional($invitation->wedding_date)->format('Y-m-d')));
+    const sideChangeMessage = 'Changing the wedding side will replace the current function list. Continue?';
+    let selectedWeddingSide = document.querySelector('input[name="wedding_side"]:checked')?.value || 'both';
 
     function showStep(step) {
         document.querySelectorAll('[data-step]').forEach(panel => panel.classList.toggle('active', panel.dataset.step === String(step)));
@@ -170,17 +190,119 @@
     document.querySelectorAll('[data-prev-step]').forEach(button => button.addEventListener('click', () => showStep(button.dataset.prevStep)));
     document.querySelectorAll('[data-submit-action]').forEach(button => button.addEventListener('click', () => nextAction.value = button.dataset.submitAction));
 
-    document.getElementById('addCeremony').addEventListener('click', function () {
+    function slugify(value) {
+        return String(value || '')
+            .toLowerCase()
+            .trim()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '');
+    }
+
+    function addCeremony(ceremony = {}) {
         const index = ceremonyList.querySelectorAll('.ceremony-card').length;
         ceremonyList.insertAdjacentHTML('beforeend', ceremonyTemplate.innerHTML.replaceAll('__INDEX__', index));
+
+        const card = ceremonyList.lastElementChild;
+        const nameInput = card.querySelector('[data-ceremony-name]');
+        const slugInput = card.querySelector('[data-ceremony-slug]');
+        const dateInput = card.querySelector('input[type="date"]');
+
+        if (nameInput) nameInput.value = ceremony.name || '';
+        if (slugInput) slugInput.value = ceremony.slug || slugify(ceremony.name || '');
+        if (dateInput) dateInput.value = ceremony.date || defaultWeddingDate || '';
+
+        reindexCeremonies();
         bindLocationInputs();
+    }
+
+    function reindexCeremonies() {
+        ceremonyList.querySelectorAll('.ceremony-card').forEach((card, index) => {
+            const prefix = `ceremony_${index}`;
+
+            card.querySelectorAll('[name]').forEach(input => {
+                input.name = input.name.replace(/ceremonies\[[^\]]+\]/, `ceremonies[${index}]`);
+            });
+
+            card.querySelectorAll('[id]').forEach(input => {
+                input.id = input.id.replace(/ceremony_(?:\d+|__INDEX__)/g, prefix);
+            });
+
+            card.querySelectorAll('[data-place-prefix]').forEach(input => {
+                input.dataset.placePrefix = prefix;
+                delete input.dataset.locationBound;
+                delete input.dataset.googleBound;
+            });
+
+            card.querySelectorAll('[data-map-preview]').forEach(preview => {
+                preview.dataset.mapPreview = prefix;
+            });
+
+            card.querySelectorAll('[data-change-location]').forEach(button => {
+                button.dataset.changeLocation = prefix;
+            });
+
+            const sortOrderInput = card.querySelector('[data-ceremony-sort-order]');
+            if (sortOrderInput) sortOrderInput.value = index + 1;
+        });
+    }
+
+    function replaceCeremoniesForSide(side) {
+        ceremonyList.innerHTML = '';
+        (weddingPresets[side] || []).forEach(ceremony => addCeremony(ceremony));
+        reindexCeremonies();
+    }
+
+    document.getElementById('addCeremony').addEventListener('click', function () {
+        addCeremony();
+    });
+
+    document.querySelectorAll('input[name="wedding_side"]').forEach(radio => {
+        radio.addEventListener('change', function () {
+            if (this.value === selectedWeddingSide) return;
+
+            if (ceremonyList.querySelectorAll('.ceremony-card').length > 0 && !window.confirm(sideChangeMessage)) {
+                const previous = document.querySelector(`input[name="wedding_side"][value="${selectedWeddingSide}"]`);
+                if (previous) previous.checked = true;
+                return;
+            }
+
+            selectedWeddingSide = this.value;
+            replaceCeremoniesForSide(this.value);
+        });
+    });
+
+    ceremonyList.addEventListener('input', function (event) {
+        if (!event.target.matches('[data-ceremony-name]')) return;
+
+        const card = event.target.closest('.ceremony-card');
+        const slugInput = card?.querySelector('[data-ceremony-slug]');
+        if (slugInput) slugInput.value = slugify(event.target.value);
     });
 
     ceremonyList.addEventListener('click', function (event) {
         if (event.target.matches('[data-remove-ceremony]')) {
             event.target.closest('.ceremony-card').remove();
+            reindexCeremonies();
+        }
+
+        if (event.target.matches('[data-move-ceremony]')) {
+            const card = event.target.closest('.ceremony-card');
+            const direction = event.target.dataset.moveCeremony;
+
+            if (direction === 'up' && card.previousElementSibling) {
+                ceremonyList.insertBefore(card, card.previousElementSibling);
+            }
+
+            if (direction === 'down' && card.nextElementSibling) {
+                ceremonyList.insertBefore(card.nextElementSibling, card);
+            }
+
+            reindexCeremonies();
+            bindLocationInputs();
         }
     });
+
+    form.addEventListener('submit', reindexCeremonies);
 
     document.addEventListener('click', function (event) {
         if (!event.target.matches('[data-change-location]')) return;
@@ -268,6 +390,7 @@
         });
     }
 
+    reindexCeremonies();
     bindLocationInputs();
     window.initInvitationPlaces = bindLocationInputs;
 </script>

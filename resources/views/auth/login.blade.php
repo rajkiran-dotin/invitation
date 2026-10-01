@@ -17,10 +17,11 @@
         <label>Email<input type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="email"></label>
         <label>Password<input type="password" name="password" required autocomplete="current-password"></label>
         <label class="check-row"><input type="checkbox" name="remember" value="1"> Remember me</label>
+        @if (session('status'))<p class="form-status">{{ session('status') }}</p>@endif
         @error('email')<p class="form-error">{{ $message }}</p>@enderror
         @error('password')<p class="form-error">{{ $message }}</p>@enderror
         <button type="submit" class="btn btn-primary">Login</button>
-        <p class="hint"><a href="#">Forgot Password?</a></p>
+        <p class="hint"><a href="{{ route('password.request') }}">Forgot Password?</a></p>
 
         <div class="auth-divider"><span>OR</span></div>
 
